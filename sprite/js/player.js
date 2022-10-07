@@ -1,12 +1,8 @@
+import { IdleLeft, IdleRight, RunRight, RunLeft } from "./playerstate.js";
 
 export default class Player {
     constructor(game) {
         this.game = game;
-        this.img = new Image;
-        this.state = 'idle';
-        this.frame = 1;
-        this.frameLimit = 8;
-        this.img.src = `./sprite/img/redhat/${this.state} (${this.frame}).png`;
         this.size = this.game.w / 7;
         this.sw = 609;
         this.sh = 569;
@@ -15,9 +11,21 @@ export default class Player {
         this.color = 'white';
         this.speedX = 0;
         this.speedY = 0;
-        this.maxSpeedX = 20;
-        this.maxSpeedY = 50;
-        this.gravity = 3;
+        this.maxSpeedX = 10;
+        this.maxSpeedY = 30;
+        this.gravity = 1;
+        this.fps = 60;
+        this.timeout = 1000/this.fps;
+        this.time = 0;
+        
+        this.state = '';
+        this.frame = 1;
+        this.frameLimit = 0;
+        this.states = [new IdleRight(this), new IdleLeft(this), new RunRight(this), new RunLeft(this)];
+        this.currentState = this.states[0];
+        this.currentState.enter();
+        this.img = new Image;
+        this.img.src = `./sprite/img/redhat/${this.state}(${this.frame}).png`;
     };
     draw(c) {
         c.beginPath();
@@ -27,7 +35,8 @@ export default class Player {
         c.drawImage(this.img, 0, 0, this.sw, this.sh, this.x, this.y, this.size, this.size);
         c.closePath()
     };
-    update(input) {
+    update(deltaTime, input) {
+        this.currentState.inputHandle(input);
         this.x += this.speedX;
         this.y += this.speedY;
         if(input.includes('ArrowRight')) this.speedX = this.maxSpeedX;
@@ -42,14 +51,23 @@ export default class Player {
             this.y = this.game.h - this.game.land.sizeY - this.size + 16;
         };
 
-        if(this.frame > this.frameLimit -1) {
-            this.frame = 1;
+        if(this.time > this.timeout) {
+            this.time = 0;
+            if(this.frame > this.frameLimit - 1) {
+                this.frame = 1;
+            } else {
+                this.frame++;
+            };
+            this.img.src = `./sprite/img/redhat/${this.state}(${this.frame}).png`;
         } else {
-            this.frame++;
+            this.time += deltaTime;
         };
-        this.img.src = `./sprite/img/redhat/${this.state} (${this.frame}).png`;
     };
     onGround() {
          return this.y >= this.game.h - this.game.land.sizeY - this.size + 16;
     };
+    changeState(state) {
+        this.currentState = this.states[state];
+        this.currentState.enter();
+    }
 };

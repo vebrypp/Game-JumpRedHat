@@ -22,12 +22,12 @@ window.addEventListener('load', function() {
         h = myCanvas.height = window.innerHeight;
     };
     function animationLoop(timeStamp) {
-        let alphaTime = timeStamp - time;
+        let deltaTime = timeStamp - time;
         time = timeStamp;
 
         c.clearRect(0, 0, w, h);
         game.draw(c);
-        game.update(alphaTime);
+        game.update(deltaTime);
         requestAnimationFrame(animationLoop);
     };
 });
