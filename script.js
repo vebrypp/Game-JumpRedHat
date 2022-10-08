@@ -18,8 +18,10 @@ window.addEventListener('load', function() {
         animationLoop(0)
     };
     function resizeCanvas() {
-        w = myCanvas.width = window.innerWidth;
-        h = myCanvas.height = window.innerHeight;
+        let fixedW = Math.floor(window.innerWidth * 9 / 10);
+        let fixedH = Math.floor(window.innerHeight * 9 / 10);
+        w = myCanvas.width = fixedW;
+        h = myCanvas.height = fixedH;
     };
     function animationLoop(timeStamp) {
         let deltaTime = timeStamp - time;

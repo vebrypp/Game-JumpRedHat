@@ -1,4 +1,4 @@
-import Land from "./land.js";
+import World from "./world.js";
 import Controller from "./controller.js";
 import Player from "./player.js";
 
@@ -7,15 +7,16 @@ export default class Game {
         this.w = w;
         this.h = h;
         this.state = 'start';
-        this.land = new Land(this);
+        this.world = new World(this);
         this.controller = new Controller();
         this.player = new Player(this);
     };
     draw(c) {
-        this.land.draw(c);
+        this.world.draw(c);
         this.player.draw(c);
     };
-    update(deltaTime) {        
+    update(deltaTime) {       
+        this.world.update(deltaTime); 
         this.player.update(deltaTime, this.controller.keys);
     };
     restart() {

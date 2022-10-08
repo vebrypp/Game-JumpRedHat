@@ -1,16 +1,23 @@
 export default class Land {
-    constructor(game) {
+    constructor(game, x) {
         this.game = game;
-        this.sizeX = this.game.w;
-        this.sizeY = 16;
-        this.x = 0;
-        this.y = this.game.h - this.sizeY;
-        this.color = 'brown';
-    }
+        this.scaleWidth = 10;
+        this.iWidth = this.game.w / this.scaleWidth;
+        this.iHeight = this.iWidth;
+        this.sizeX = this.game.w / 5;
+        this.sizeY = this.iHeight;
+        this.x = x;
+        this.y = this.game.h - this.sizeY - 10;
+        this.img = new Image;
+        this.img.src = './sprite/img/tiles/landearth.png';
+    };
     draw(c) {
         c.beginPath();
-        c.fillStyle = this.color;
-        c.fillRect(this.x, this.y, this.sizeX, this.sizeY);
+        c.drawImage(this.img, this.x, this.y, this.iWidth, this.iHeight);
         c.closePath();
     };
-}
+    update() {
+        this.x--;
+        if(this.x < -this.iWidth) this.x = this.game.w;
+    };
+};
