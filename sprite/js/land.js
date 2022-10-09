@@ -1,23 +1,27 @@
-export default class Land {
+export class Land {
     constructor(game, x) {
         this.game = game;
-        this.scaleWidth = 10;
-        this.iWidth = this.game.w / this.scaleWidth;
-        this.iHeight = this.iWidth;
-        this.sizeX = this.game.w / 5;
-        this.sizeY = this.iHeight;
-        this.x = x;
-        this.y = this.game.h - this.sizeY - 10;
+        this.width = this.game.w / this.game.scaleWorld;
+        this.height = this.width;
+        this.x = 0;
+        this.y = this.game.h - this.height;
+        this.sx = 0;
+        this.sy = 0;
+        this.sw = 128;
+        this.sh = 128;
         this.img = new Image;
-        this.img.src = './sprite/img/tiles/landearth.png';
+        this.img.src = './sprite/img/land/landearth.png';
+        this.marked = false;
     };
     draw(c) {
-        c.beginPath();
-        c.drawImage(this.img, this.x, this.y, this.iWidth, this.iHeight);
-        c.closePath();
+        for(let i = 0; i < this.game.scaleWorld * 2; i++) {
+            c.beginPath();
+            c.drawImage(this.img, this.sx, this.sy, this.sw, this.sh, this.x + i * this.width, this.y, this.width, this.height);
+            c.closePath();
+        };
     };
     update() {
-        this.x--;
-        if(this.x < -this.iWidth) this.x = this.game.w;
+        this.x -= this.game.speedWorld;
+        if(this.x < -this.width) this.x = 0
     };
 };

@@ -9,125 +9,89 @@ let state = {
     fallLeft: 7,
 };
 
-class State {
-    constructor() {
-
-    };
-};
-
-export class IdleRight extends State {
+export class IdleRight {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Idle Right';
-        this.player.frameLimit = 10;
+        this.player.maxFrame = 9;
+        this.player.state = 'idleright';
     };
-    inputHandle(input) {
-        if(input.includes('ArrowRight')) this.player.changeState(state.runRight);
-        if(input.includes('ArrowLeft')) this.player.changeState(state.runLeft);
-        if(input.includes('Space')) this.player.changeState(state.jumpRight);
+    handleInput(input) {
+        if(input.includes('ArrowRight')) this.player.stateChange(state.runRight);
+        if(input.includes('ArrowLeft')) this.player.stateChange(state.runLeft);
+        if(input.includes('ArrowUp')) this.player.stateChange(state.jumpRight);
     };
 };
-export class IdleLeft extends State {
+export class IdleLeft {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Idle Left';
-        this.player.frameLimit = 10;
+        this.player.maxFrame = 9;
+        this.player.state = 'idleleft';
     };
-    inputHandle(input) {
-        if(input.includes('ArrowRight')) this.player.changeState(state.runRight);
-        if(input.includes('ArrowLeft')) this.player.changeState(state.runLeft);
-        if(input.includes('Space')) this.player.changeState(state.jumpLeft);
+    handleInput(input) {
+        if(input.includes('ArrowRight')) this.player.stateChange(state.runRight);
+        if(input.includes('ArrowLeft')) this.player.stateChange(state.runLeft);
+        if(input.includes('ArrowUp')) this.player.stateChange(state.jumpLeft);
     };
 };
-export class RunRight extends State {
+export class RunRight {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Run Right';
-        this.player.frameLimit = 8;
+        this.player.maxFrame = 9;
+        this.player.state = 'runright';
     };
-    inputHandle(input) {
-        if(input.length === 0) this.player.changeState(state.idleRight);
-        if(input.includes('ArrowLeft') && !input.includes('ArrowRight')) this.player.changeState(state.runLeft);
-        if(input.includes('Space')) this.player.changeState(state.jumpRight);
+    handleInput(input) {
+        if(input.length === 0) this.player.stateChange(state.idleRight);
+        if(input[0] === 'ArrowLeft') this.player.stateChange(state.runLeft);
+        if(input.includes('ArrowUp')) this.player.stateChange(state.jumpRight);
     };
 };
-export class RunLeft extends State {
+export class RunLeft {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Run Left';
-        this.player.frameLimit = 8;
+        this.player.maxFrame = 9;
+        this.player.state = 'runleft';
     };
-    inputHandle(input) {
-        if(input.length === 0) this.player.changeState(state.idleLeft);
-        if(input.includes('ArrowRight') && !input.includes('ArrowLeft')) this.player.changeState(state.runRight);
-        if(input.includes('Space')) this.player.changeState(state.jumpLeft);
+    handleInput(input) {
+        if(input.length === 0) this.player.stateChange(state.idleLeft);
+        if(input[0] === 'ArrowRight') this.player.stateChange(state.runRight);
+        if(input.includes('ArrowUp')) this.player.stateChange(state.jumpLeft);
     };
 };
-export class JumpRight extends State {
+export class JumpRight {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Jump Right';
-        this.player.frameLimit = 9;
+        this.player.state = 'jumpright';
+        this.player.frame = 1;
+        this.player.maxFrame = 3;
     };
-    inputHandle(input) {
-        if(input[0] === 'ArrowLeft') this.player.changeState(state.jumpLeft);
+    handleInput(input) {
+        if(input.length === 0 && this.player.onGround()) this.player.stateChange(state.idleRight);
+        if(input.includes('ArrowRight') && this.player.onGround()) this.player.stateChange(state.runRight);
+        if(input.includes('ArrowLeft') && !input.includes('ArrowRight') && !this.player.onGround()) this.player.stateChange(state.jumpLeft);
     };
 };
-export class JumpLeft extends State {
+export class JumpLeft {
     constructor(player) {
-        super();
         this.player = player;
     };
     enter() {
-        this.player.state = 'Jump Left';
-        this.player.frameLimit = 9;
+        this.player.state = 'JumpLeft';
+        this.player.frame = 1;
+        this.player.maxFrame = 3;
     };
-    inputHandle(input) {
-        if(input[0] === 'ArrowRight') this.player.changeState(state.jumpRight);
-    };
-};
-export class FallRight extends State {
-    constructor(player) {
-        super();
-        this.player = player;
-    };
-    enter() {
-        this.player.state = 'Fall Right';
-        this.player.frameLimit = 1;
-    };
-    inputHandle(input) {
-        if(input.length === 0 && this.player.onGround()) this.player.changeState(state.idleRight);
-        if(input.includes('ArrowRight') && this.player.onGround()) this.player.changeState(state.runRight);
-        if(input[0] === 'ArrowLeft' && !this.player.onGround()) this.player.changeState(state.fallLeft);
-    };
-};
-export class FallLeft extends State {
-    constructor(player) {
-        super();
-        this.player = player;
-    };
-    enter() {
-        this.player.state = 'Fall Left';
-        this.player.frameLimit = 1;
-    };
-    inputHandle(input) {
-        if(input.length === 0 && this.player.onGround()) this.player.changeState(state.idleLeft);
-        if(input.includes('ArrowLeft') && this.player.onGround()) this.player.changeState(state.runLeft);
-        if(input[0] === 'ArrowRight' && !this.player.onGround()) this.player.changeState(state.fallRight);
+    handleInput(input) {
+        if(input.length === 0 && this.player.onGround()) this.player.stateChange(state.idleLeft);
+        if(input.includes('ArrowLeft') && this.player.onGround()) this.player.stateChange(state.runLeft);
+        if(input.includes('ArrowRight') && !input.includes('ArrowLeft') && !this.player.onGround()) this.player.stateChange(state.jumpRight);
     };
 };

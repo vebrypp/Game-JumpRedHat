@@ -14,5 +14,5 @@ body {
 }
 
 canvas#myCanvas {
-    background-color: black;
+    background-color: rgb(148, 148, 148);
 }

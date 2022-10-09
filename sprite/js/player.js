@@ -1,86 +1,79 @@
-import { IdleLeft, IdleRight, RunRight, RunLeft, JumpRight, JumpLeft, FallRight, FallLeft } from "./playerstate.js";
+import { IdleLeft, IdleRight, JumpLeft, JumpRight, RunLeft, RunRight } from "./playerstate.js";
 
 export default class Player {
     constructor(game) {
-        this.game = game;
-        this.size = this.game.w / 7;
-        this.sw = 609;
-        this.sh = 569;
-        this.x = 0;
-        this.y = this.game.h - this.game.world.land.sizeY - this.size + 16;
-        this.color = 'white';
+        this.game = game
         this.speedX = 0;
         this.speedY = 0;
-        this.maxSpeedX = 10;
-        this.maxSpeedY = 30;
-        this.gravity = 1;
-        this.fps = 30;
-        this.timeout = 1000/this.fps;
         this.time = 0;
-        
-        this.state = '';
-        this.frame = 1;
-        this.frameLimit = 0;
-        this.states = [
-            new IdleRight(this),
-            new IdleLeft(this),
+        this.timeOut = 1000 / this.game.fps;
+        this.stateList = [
+            new IdleRight(this), 
+            new IdleLeft(this), 
             new RunRight(this),
             new RunLeft(this),
             new JumpRight(this),
-            new JumpLeft(this),
-            new FallRight(this),
-            new FallLeft(this)
+            new JumpLeft(this)
         ];
-        this.currentState = this.states[0];
-        this.currentState.enter();
+        this.currentState = this.stateList[0];
+        this.state = 0;
+        
+        this.frame = 0;
+        this.maxFrame = 9;
         this.img = new Image;
-        this.img.src = `./sprite/img/redhat/${this.state}(${this.frame}).png`;
+        this.img.src = `./sprite/img/player/${this.state}${this.frame}.png`;
+        this.sx = 0;
+        this.sy = 0;
+        this.sw = 536;
+        this.sh = 522;
+        this.sizeX = this.game.w / this.game.scale;
+        this.sizeY = this.sizeX;
+        this.x = 0;
+        this.y = this.game.h - this.sizeY - this.game.world.land.height + (this.game.h / 25);
+        this.currentState.enter();
+
+        this.strokeColor = 'white';
+
     };
     draw(c) {
         c.beginPath();
-        c.strokeStyle = this.color;
-        c.rect(this.x, this.y, this.size, this.size);
+        c.strokeStyle = this.strokeColor;
+        c.rect(this.x, this.y, this.sizeX, this.sizeY)
+        c.drawImage(this.img, this.sx, this.sy, this.sw, this.sh, this.x, this.y, this.sizeX, this.sizeY);
         c.stroke();
-        c.drawImage(this.img, 0, 0, this.sw, this.sh, this.x, this.y, this.size, this.size);
-        c.closePath()
+        c.closePath();
     };
-    update(deltaTime, input) {
-        this.currentState.inputHandle(input);
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if(input[0] === 'ArrowRight') this.speedX = this.maxSpeedX;
-        else if(input[0] === 'ArrowLeft') this.speedX = -this.maxSpeedX;
-        else this.speedX = 0;
-        if(this.x < 0) this.x = 0;
-        if(this.x + this.size > this.game.w) this.x = this.game.w - this.size;
-        if(this.onGround() && input.includes('Space')) this.speedY = -this.maxSpeedY;
-        if(!this.onGround()) {
-            this.speedY += this.gravity;
-            if(this.speedY === 0 && this.currentState === this.states[4]) this.changeState(6), this.frame = 1;
-            if(this.speedY === 0 && this.currentState === this.states[5]) this.changeState(7), this.frame = 1;
-        } else {
-            this.y = this.game.h - this.game.world.land.sizeY - this.size + 16;
-        };
-
-        if(this.time > this.timeout) {
+    update(input, deltatime) {
+        if(this.time > this.timeOut) {
             this.time = 0;
-            if(this.frame > this.frameLimit - 1) {
-                this.frame = 1;
-                if(this.currentState === this.states[4] || this.currentState === this.states[5]) this.frame = 4;
-                if(this.currentState === this.states[6] || this.currentState === this.states[7]) this.frame = 2;
-            } else {
-                this.frame++;
-            };
-            this.img.src = `./sprite/img/redhat/${this.state}(${this.frame}).png`;
+            if(this.frame >= this.maxFrame) this.frame = 0;
+            else this.frame++;
         } else {
-            this.time += deltaTime;
+            this.time += deltatime;
         };
+        
+        this.currentState.handleInput(input);
+        this.x += this.speedX;
+        if(input.includes('ArrowLeft') && !(input.includes('ArrowRight'))) this.speedX = -this.game.speedX;
+        if(input.includes('ArrowRight') && !(input.includes('ArrowLeft'))) this.speedX = this.game.speedX;
+        if(input.length === 0) this.speedX = 0;
+        if(this.x < 0) this.x = 0;
+        if(this.x > this.game.w - this.sizeX) this.x = this.game.w - this.sizeX;
+
+        if(input.includes('ArrowUp') && this.onGround()) this.speedY = -this.game.speedY;
+        this.y += this.speedY;
+        if(!this.onGround()) {
+            this.speedY += this.game.gravity;
+            if(this.frame === 0) this.frame = this.maxFrame;
+        } else this.y = this.game.h - this.sizeY - this.game.world.land.height + (this.game.h / 25), this.speedY = 0;
+
+        this.img.src = `./sprite/img/player/${this.state}${this.frame}.png`;
     };
     onGround() {
-         return this.y >= this.game.h - this.game.world.land.sizeY - this.size + 16;
+        return this.y >= this.game.h - this.sizeY - this.game.world.land.height + (this.game.h / 25);
     };
-    changeState(state) {
-        this.currentState = this.states[state];
+    stateChange(state) {
+        this.currentState = this.stateList[state];
         this.currentState.enter();
     }
 };
